@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Chat App - node.js and socket.io</title>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+	<link rel="stylesheet" type="text/css" href="styles.css">
+	<style type="text/css" media="screen">
+	</style>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+</head>
+<body>
+
+	<div class="container">
+		<div class="row">
+			<div class="col-sm-2">
+				<h3>it's a chat</h3>
+			</div>
+		</div>
+	</div>
+
+	<div class="container" id="chatRoom">
+		<div class="row">
+			<div class="col-sm-10" id="textBox">
+				<div class="col-sm-12" id="messages"></div>
+				<div class="col-sm-12">
+					<form id="submit-message">
+						<input type="text" id="new-message" placeholder='some words'>
+						<button type='submit' class="btn btn-primary fancy-button" id="send-message">send</button>
+					</form>
+				</div>
+			</div>
+			<div class="col-sm-2 text-right" id="users">
+			<!-- user list -->
+			</div>
+		</div>
+	</div>
+<script type="text/javascript" src="/socket.io/socket.io.js"></script>	
+
+<script type="text/javascript">
+	console.log('browser javascript');
+	var name = prompt('what is your name?');
+	var socketio = io.connect('http://127.0.0.1:8080');
+	//send an event to the server
+	socketio.emit('nameToServer',name);
+	// socketio.emit('clientInfo',{nam})
+	socketio.on('usersArray',(userArray)=>{
+		// console.log(userName + " just joined");
+		var usersDiv = document.getElementById('users');
+		usersDiv.innerHTML = '<h4>Users Online</h4>';
+		for (let i = 0; i < userArray.length; i++){
+			usersDiv.innerHTML += `<div class="col-sm-12">${userArray[i].name}</div>`;			
+		};
+		$('#messages').append(`<p style="text-align: center;">${userArray[userArray.length -1].name} has connected</p>`);		
+
+	});
+
+	$('#send-message').click(function(){
+		socketio.emit('sendMessage');
+	});
+
+	$('#submit-message').submit(function(event){
+		event.preventDefault();
+		var date = new Date();
+		// var localDate = ;	
+		var newMessage = $('#new-message').val();
+		socketio.emit('messageToServer',{
+			newMessage:newMessage,
+			name:name,
+			day:date.toLocaleTimeString()
+		});
+		$('#new-message').val('');
+	});
+
+	socketio.on('messageToClient', (message)=>{
+		$('#messages').append(`<p>${message}</p>`);
+		$('#messages').scrollTop($('#messages').height());
+	});
+	socketio.on('userDisconnect',(userArray)=>{
+		console.log(userArray)
+		var usersDiv = document.getElementById('users');
+		usersDiv.innerHTML = '<h4>Users Online</h4>';
+		for (let i = 0; i < userArray.length; i++){
+			usersDiv.innerHTML += `<div class="col-sm-12">${userArray[i].name}</div>`;			
+		};		
+	});
+
+
+</script>
+</body>
+</html>
