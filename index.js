@@ -8,12 +8,7 @@ var fs = require("fs");
 var socketio = require("socket.io");
 
 var usersArray = [];
-function userDel(name){
-	var toDel = usersArray.indexOf(name);
-	if (toDel >= 0){
-		usersArray.slice(toDel,1);
-	}
-}
+
 
 
 
@@ -84,7 +79,7 @@ io.sockets.on('connect', (socket)=>{
 		for (let i = 0; i < usersArray.length; i++){
 			var currentUser = usersArray[i];
 			if (currentUser.id == socket.id){
-				usersArray.pop(currentUser);
+				usersArray.splice(currentUser,1);
 				break;
 			}
 		}
