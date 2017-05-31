@@ -8,7 +8,12 @@ var fs = require("fs");
 var socketio = require("socket.io");
 
 var usersArray = [];
-
+function userDel(name){
+	var toDel = usersArray.indexOf(name);
+	if (toDel >= 0){
+		usersArray.slice(toDel,1);
+	}
+}
 
 
 
@@ -36,6 +41,18 @@ var server = http.createServer((req,res)=>{
 				res.end('Internal Server Error');
 			}else{
 				res.writeHead(200,{'content-type':'text/css'});
+				res.end(data);
+			}
+		});
+	}else if(req.url == '/config.js'){
+		fs.readFile('config.js', 'utf-8', (error,data)=>{
+			// console.log(data);
+			// console.log(error);
+			if(error){
+				res.writeHead(500,{'content-type':'text/html'});
+				res.end('Internal Server Error');
+			}else{
+				res.writeHead(200,{'content-type':'application/javascript'});
 				res.end(data);
 			}
 		});
